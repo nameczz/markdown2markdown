@@ -3,19 +3,27 @@ const fs = require("fs");
 const path = require("path");
 const chokidar = require("chokidar");
 
-const name_fragment = "fragment";
-const name_variable = "variables.json";
-const name_doc_folder = "src";
-const name_doc_target = "site";
-const name_template = "template.md";
+const name_dir_from = "src";
+const name_dir_to = "site";
+const name_dir_fragment = "fragment";
+const name_file_variable = "variables.json";
+const name_file_template = "template.md";
 
-const file_filtered = [name_variable, name_template];
-const dir_filtered = [name_fragment];
-const name_filtered = [...file_filtered, dir_filtered];
+const file_filtered = [name_file_variable, name_file_template];
+const dir_filtered = [name_dir_fragment];
+const all_filtered = [...file_filtered, dir_filtered];
 
+const _isFragment = path_abs => {
+  const str = `/src\/.{0,100}\/${name_dir_fragment}/`;
+  const regex = new RegExp(str, "i");
+  return regex.test(path_abs);
+};
 const _isDirFiltered = path_abs => {
   return dir_filtered.some(f => path_abs.indexOf(f) > -1);
 };
+const _isFileFiltered = path_abs => {
+  
+}
 const _getAbsPath = (father, child) => `${father}/${child}`;
 const _isDirectory = path_abs => fs.lstatSync(path_abs).isDirectory();
 const _getChildrenAbsPaths = path_abs => {
@@ -40,7 +48,7 @@ const _splitDirectoryAndFile = paths_abs => {
 };
 const _parseFromToTargetPath = path_from => {
   const arr = path_from.split(__dirname);
-  let target_rel = arr[1].replace(name_doc_folder, name_doc_target);
+  let target_rel = arr[1].replace(name_dir_from, name_dir_to);
   target_rel = target_rel.slice(1, target_rel.length);
   return path.resolve(__dirname, target_rel);
 };
@@ -79,7 +87,7 @@ const _removeDir = dir => {
       fs.unlinkSync(newPath);
     }
   }
-  if (dir !== path.resolve(__dirname, name_doc_target)) {
+  if (dir !== path.resolve(__dirname, name_dir_to)) {
     fs.rmdirSync(dir);
   }
 };
@@ -100,7 +108,7 @@ const _replaceContent = (match, target = "", content) => {
   return c_before + target + c_after;
 };
 const _getTargetPathFromJson = path_abs => {
-  path_abs = path_abs.replace(name_doc_folder, name_doc_target);
+  path_abs = path_abs.replace(name_dir_from, name_dir_to);
   return path_abs.slice(0, path_abs.length - 4) + "md";
 };
 const _replaceFragment = (content, map_fragment, language) => {
@@ -109,15 +117,15 @@ const _replaceFragment = (content, map_fragment, language) => {
   // console.log(matches);
   if (matches) {
     // console.log(matches);
-    matches.forEach(name_fragment => {
-      const key = name_fragment
+    matches.forEach(name_dir_fragment => {
+      const key = name_dir_fragment
         .split(" ")
         .join("")
-        .slice(2, name_fragment.length - 2);
-      const path_abs = path.resolve(__dirname, name_doc_folder, language, key);
+        .slice(2, name_dir_fragment.length - 2);
+      const path_abs = path.resolve(__dirname, name_dir_from, language, key);
       const content_f = map_fragment[path_abs];
       // console.log(content);
-      content = _replaceContent(name_fragment, content_f, content);
+      content = _replaceContent(name_dir_fragment, content_f, content);
       // console.log(content);
     });
   }
@@ -128,11 +136,11 @@ const _replaceVariable = (content = "", variable) => {
   const matches = content.match(regex);
   if (matches) {
     // console.log(matches);
-    matches.forEach(name_fragment => {
-      const keyChain = name_fragment
+    matches.forEach(name_dir_fragment => {
+      const keyChain = name_dir_fragment
         .split(" ")
         .join("")
-        .slice(2, name_fragment.length - 2)
+        .slice(2, name_dir_fragment.length - 2)
         .split(".");
       keyChain.shift();
       let target = variable[keyChain[0]];
@@ -141,7 +149,7 @@ const _replaceVariable = (content = "", variable) => {
         target = target[key];
         i++;
       }
-      content = _replaceContent(name_fragment, target, content);
+      content = _replaceContent(name_dir_fragment, target, content);
       // console.log(content);
     });
   }
@@ -159,11 +167,11 @@ const _replaceTab = (content = "", tabLinks) => {
 const _reWriteFile = (path_abs, map_fragment, map_variable) => {
   let content = _readFileToString(path_abs);
   const language = path_abs
-    .split(`${__dirname}/${name_doc_folder}/`)[1]
+    .split(`${__dirname}/${name_dir_from}/`)[1]
     .split("/")[0];
   content = _replaceFragment(content, map_fragment, language);
   content = _replaceVariable(content, map_variable);
-  const path_target = path_abs.replace(name_doc_folder, name_doc_target);
+  const path_target = path_abs.replace(name_dir_from, name_dir_to);
   return fs.writeFileSync(path_target, content);
 };
 const _genPageFromTemplate = (
@@ -175,7 +183,7 @@ const _genPageFromTemplate = (
 ) => {
   // console.log("xxx", path_jsonFile, path_template);
   const language = path_jsonFile
-    .split(`${__dirname}/${name_doc_folder}/`)[1]
+    .split(`${__dirname}/${name_dir_from}/`)[1]
     .split("/")[0];
   let content = _readFileToString(path_template);
   // replace fragment
@@ -223,17 +231,17 @@ function convert(target, map_fragment = {}, map_variable = {}) {
   const targets = [];
   let fragmentFolder, variableFile, template;
   res.forEach(name => {
-    const isContent = name !== name_fragment && name !== name_variable;
+    const isContent = name !== name_dir_fragment && name !== name_file_variable;
     if (isContent) {
       targets.push(_getAbsPath(target, name));
     }
-    if (name === name_fragment) {
+    if (name === name_dir_fragment) {
       fragmentFolder = name;
     }
-    if (name === name_variable) {
+    if (name === name_file_variable) {
       variableFile = name;
     }
-    if (name === name_template) {
+    if (name === name_file_template) {
       template = name;
     }
   });
@@ -304,24 +312,39 @@ const main = path_src => {
 };
 
 let timeout;
-const startWatch = () => {
-  const watcher = chokidar.watch(
-    path.resolve(__dirname, `${name_doc_folder}/`)
-  );
-  const run = (event, path_abs) => {
-    try {
-      if (timeout) {
-        clearTimeout(timeout);
-      }
-      timeout = setTimeout(() => {
-        main(path.resolve(__dirname, `${name_doc_folder}/`));
-      }, 1000);
-    } catch (err) {
-      console.log(err);
-      return;
+const initialScan = (event, path_abs) => {
+  try {
+    if (timeout) {
+      clearTimeout(timeout);
     }
-  };
-  watcher.on("all", run);
+    timeout = setTimeout(() => {
+      main(path.resolve(__dirname, `${name_dir_from}/`));
+    }, 1000);
+  } catch (err) {
+    console.log(err);
+    return;
+  }
+};
+const onFileAdd = path_abs => {
+  console.log(`File ${path_abs} has been added`);
+  const is_fragment = _isFragment(path_abs);
+  console.log(is_fragment);
+  if (!is_fragment) {
+  }
+};
+const startWatch = () => {
+  const watcher = chokidar.watch(path.resolve(__dirname, `${name_dir_from}/`));
+  watcher.on("ready", initialScan).on("add", onFileAdd);
+  // .on("change", path => console.log(`File ${path} has been changed`))
+  // .on("unlink", path => console.log(`File ${path} has been removed`))
+  // .on("addDir", path => console.log(`Directory ${path} has been added`))
+  // .on("unlinkDir", path => console.log(`Directory ${path} has been removed`))
+  // .on("error", error => console.log(`Watcher error: ${error}`))
+  // .on("all", (event, path) => console.log(event, path))
+  // .on("raw", (event, path, details) => {
+  //   log("Raw event info:", event, path, details);
+  // });
+  // watcher.on("all", initialScan);
   // .on("error", error => log(`Watcher error: ${error}`));
 };
 
@@ -339,4 +362,6 @@ startWatch();
  * - 目前fragment会被遍历多次, 如确认每个folder有且仅有一个fragent根目录, 记得修改;
  * - 新增/删除/改动哪个文件 就更改哪个文件及其关联文件,不要全局改动;
  * - testcase
+ * - tab标签属于非标准功能, 移除,之后用注册的方式加入
+ * - move ignore, fragment, template to config.js in root
  */
