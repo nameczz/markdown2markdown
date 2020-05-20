@@ -13,17 +13,17 @@ const file_filtered = [name_file_variable, name_file_template];
 const dir_filtered = [name_dir_fragment];
 const all_filtered = [...file_filtered, dir_filtered];
 
-const _isFragment = path_abs => {
-  const str = `/src\/.{0,100}\/${name_dir_fragment}/`;
-  const regex = new RegExp(str, "i");
-  return regex.test(path_abs);
+//TODO: add parse json to object return default {};
+const _isFiltered = path_abs => {
+  return all_filtered.some(name_f => {
+    // 用正则处理文件夹带"."的情况比较麻烦
+    const str = `/${name_f}`;
+    return path_abs.indexOf(str) !== -1;
+  });
 };
 const _isDirFiltered = path_abs => {
   return dir_filtered.some(f => path_abs.indexOf(f) > -1);
 };
-const _isFileFiltered = path_abs => {
-  
-}
 const _getAbsPath = (father, child) => `${father}/${child}`;
 const _isDirectory = path_abs => fs.lstatSync(path_abs).isDirectory();
 const _getChildrenAbsPaths = path_abs => {
@@ -327,9 +327,9 @@ const initialScan = (event, path_abs) => {
 };
 const onFileAdd = path_abs => {
   console.log(`File ${path_abs} has been added`);
-  const is_fragment = _isFragment(path_abs);
-  console.log(is_fragment);
-  if (!is_fragment) {
+  const is_filtered = _isFiltered(path_abs);
+  console.log(is_filtered);
+  if (!is_filtered) {
   }
 };
 const startWatch = () => {
