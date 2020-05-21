@@ -320,18 +320,15 @@ startWatch();
  * - 不相关的文件不要移动和复制
  * - Readme
  * - 新增/删除/改动哪个文件 就更改哪个文件及其关联文件,不要全局改动;
+ * - fragment in fragment
+ * - bash in src, markdown in doc
+ *  - split helper
+ * - 目前fragment会被遍历多次, 如确认每个folder有且仅有一个fragent根目录, 记得修改;
  * TODO:
  * - variable in .md (top)
  *
  * - testcase
  * - move ignore, fragment, template to .docignore in root
- * - template-->page
- * - fragment-->component
- * - fragment in fragment
- * - bash in src, markdown in doc
- *  - split helper
  * - tab标签属于非标准功能, 移除,之后用注册的方式加入
- * - 目前fragment会被遍历多次, 如确认每个folder有且仅有一个fragent根目录, 记得修改;
- * - color console.log
  *
  */
