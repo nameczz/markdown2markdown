@@ -126,21 +126,18 @@ const _genPageFromTemplate = (
   let content = fileToString(path_template);
   // replace fragment
   content = replaceFragment(content, map_fragment, language);
-  // console.log(content);
   // replace var
   const var_json = JSON.parse(fileToString(path_jsonFile));
   map_variable = merge(map_variable, var_json);
-  // console.log(map_variable);
   content = _replaceVariable(content, map_variable);
-  // console.log(content);
   // replace tab
   content = _replaceTab(content, tabLinks);
   // console.log(content);
   const path_target = _getTargetPathFromJson(path_jsonFile);
   return fs.writeFileSync(path_target, content);
 };
-const _parseFragment = (path_abs, map_fragment = {}) => {
-  const res = getChildrenPath(path_abs) || [];
+const _parseFragment = (path_fragment, map_fragment = {}) => {
+  const res = getChildrenPath(path_fragment) || [];
   const { directories, markdowns } = classifyFileAndDir(res);
   if (markdowns.length) {
     markdowns.forEach(path_abs => {
