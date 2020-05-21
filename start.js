@@ -296,7 +296,7 @@ const _rmDir = path_target => {
 };
 const onDirRemove = path_from => {
   const path_target = getTargetPath(path_from);
-  console.log("xxx", path_from, path_target, "\n", "\n", "\n");
+  // console.log("xxx", path_from, path_target, "\n", "\n", "\n");
   _rmDir(path_target);
 };
 const startWatch = () => {
