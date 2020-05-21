@@ -279,21 +279,26 @@ const onAddDir = path_from => {
     !fs.existsSync(path_target) && fs.mkdirSync(path_target);
   }
 };
+const _rmDir = path_target => {
+  if (fs.existsSync(path_target)) {
+    let files = fs.readdirSync(path_target);
+    for (var i = 0; i < files.length; i++) {
+      let newPath = path.join(path_target, files[i]);
+      let stat = fs.statSync(newPath);
+      if (stat && !stat.isDirectory()) {
+        fs.unlinkSync(newPath);
+      } else {
+        _rmDir(newPath);
+      }
+    }
+    fs.rmdirSync(path_target);
+  }
+};
 const onDirRemove = path_from => {
   console.log("xxx", path_from);
   if (!_isFiltered(path_from)) {
     const path_target = getTargetPath(path_from);
-    if (fs.existsSync(path_target)) {
-      let files = fs.readdirSync(path_target);
-      for (var i = 0; i < files.length; i++) {
-        let newPath = path.join(path_target, files[i]);
-        let stat = fs.statSync(newPath);
-        if (stat && !stat.isDirectory()) {
-          fs.unlinkSync(newPath);
-        }
-      }
-      fs.rmdirSync(path_target);
-    }
+    _rmDir(path_target);
   }
 };
 const startWatch = () => {
