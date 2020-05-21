@@ -15,5 +15,6 @@ module.exports = {
   all_filtered,
   name_dir_from,
   name_dir_to,
-  name_file_variable
+  name_file_variable,
+  name_dir_fragment
 };

@@ -1,5 +1,4 @@
 import cases from "jest-in-case";
-import { getVariable } from "./File";
 
 cases(
   "add(augend, addend)",

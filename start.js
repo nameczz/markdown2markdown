@@ -1,14 +1,15 @@
+const merge = require("lodash/merge");
+const fs = require("fs");
+const path = require("path");
+const chokidar = require("chokidar");
 const {
   dir_filtered,
   all_filtered,
   name_dir_from,
   name_dir_to
 } = require("./src/Consts");
-const { getVariable } = require("./src/helpers/File");
-const merge = require("lodash/merge");
-const fs = require("fs");
-const path = require("path");
-const chokidar = require("chokidar");
+const { writeFile, classifyFileAndDir } = require("./src/helpers/File");
+const { getChildrenPath } = require("./src/helpers/Path");
 
 //TODO: add parse json to object return default {};
 const _isFiltered = path_abs => {
@@ -23,26 +24,7 @@ const _isDirFiltered = path_abs => {
 };
 const _getAbsPath = (father, child) => `${father}/${child}`;
 const _isDirectory = path_abs => fs.lstatSync(path_abs).isDirectory();
-const _getChildrenAbsPaths = path_abs => {
-  return fs.readdirSync(path_abs).map(item => _getAbsPath(path_abs, item));
-};
-const _splitDirectoryAndFile = paths_abs => {
-  const directories = [];
-  const markdowns = [];
-  const jsons = [];
-  paths_abs.forEach(path_abs => {
-    const isMarkdownFile = path_abs.indexOf(".md") === path_abs.length - 3;
-    const isJsonFile = path_abs.indexOf(".json") === path_abs.length - 5;
-    if (_isDirectory(path_abs)) {
-      directories.push(path_abs);
-    } else if (isMarkdownFile) {
-      markdowns.push(path_abs);
-    } else if (isJsonFile) {
-      jsons.push(path_abs);
-    }
-  });
-  return { directories, markdowns, jsons };
-};
+
 const _parseFromToTargetPath = path_from => {
   const arr = path_from.split(__dirname);
   let target_rel = arr[1].replace(name_dir_from, name_dir_to);
@@ -63,8 +45,8 @@ const _copyDir = path_src => {
   if (should_copy_this) {
     fs.mkdirSync(target);
   }
-  const children = _getChildrenAbsPaths(path_src) || [];
-  const { directories } = _splitDirectoryAndFile(children);
+  const children = getChildrenPath(path_src) || [];
+  const { directories } = classifyFileAndDir(children);
   if (directories.length) {
     directories.forEach(d => {
       _copyDir(d);
@@ -199,8 +181,8 @@ const _genPageFromTemplate = (
   return fs.writeFileSync(path_target, content);
 };
 const _parseFragment = (path_abs, map_fragment = {}) => {
-  const res = _getChildrenAbsPaths(path_abs) || [];
-  const { directories, markdowns } = _splitDirectoryAndFile(res);
+  const res = getChildrenPath(path_abs) || [];
+  const { directories, markdowns } = classifyFileAndDir(res);
   if (markdowns.length) {
     markdowns.forEach(path_abs => {
       const content = fs.readFileSync(path_abs).toString();
@@ -243,7 +225,7 @@ function convert(target, map_fragment = {}, map_variable = {}) {
     }
   });
   // console.log(targets)
-  const { directories, markdowns, jsons } = _splitDirectoryAndFile(targets);
+  const { directories, markdowns, jsons } = classifyFileAndDir(targets);
   // 获取fragment和顶部变量,开始遍历和替换
   if (!!fragmentFolder) {
     map_fragment = _parseFragment(
@@ -312,24 +294,25 @@ const main = path_src => {
 
 let timeout;
 const initialScan = (event, path_abs) => {
+  // _getFragment("/home/zilliz/project/test-doc/doc/en/test.md");
   try {
     if (timeout) {
       clearTimeout(timeout);
     }
     timeout = setTimeout(() => {
-      main(path.resolve(__dirname, `${name_dir_from}/`));
+      // main(path.resolve(__dirname, `${name_dir_from}/`));
     }, 1000);
   } catch (err) {
     console.log(err);
     return;
   }
 };
-const onFileAdd = path_abs => {
-  // console.log(`File ${path_abs} has been added`);
-  const is_filtered = _isFiltered(path_abs);
+const onFileAdd = path_from => {
+  // console.log(`File ${path_from} has been added`);
+  const is_filtered = _isFiltered(path_from);
   // console.log(is_filtered);
   if (!is_filtered) {
-    const parh_target = _parseFromToTargetPath(path_abs);
+    // writeFile(parh_from);
   }
 };
 const startWatch = () => {
