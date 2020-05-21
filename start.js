@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const chokidar = require("chokidar");
 
-const name_dir_from = "src";
+const name_dir_from = "doc";
 const name_dir_to = "site";
 const name_dir_fragment = "fragment";
 const name_file_variable = "variables.json";
@@ -267,7 +267,9 @@ function convert(target, map_fragment = {}, map_variable = {}) {
     const tabLinks = {};
     // console.log(jsons);
     jsons.forEach(path_jsonFile => {
-      path_jsonFile = path_jsonFile.split(path.resolve(__dirname, "src"))[1];
+      path_jsonFile = path_jsonFile.split(
+        path.resolve(__dirname, name_dir_from)
+      )[1];
       const arr = path_jsonFile.split("/");
       const key = arr[arr.length - 1].split(".json")[0];
       arr.splice(1, 0, version);
@@ -330,6 +332,7 @@ const onFileAdd = path_abs => {
   const is_filtered = _isFiltered(path_abs);
   console.log(is_filtered);
   if (!is_filtered) {
+    const parh_target = _parseFromToTargetPath(path_abs);
   }
 };
 const startWatch = () => {
@@ -359,9 +362,18 @@ startWatch();
  * - 不相关的文件不要移动和复制
  * - Readme
  * TODO:
- * - 目前fragment会被遍历多次, 如确认每个folder有且仅有一个fragent根目录, 记得修改;
+ * - variable in .md (top)
  * - 新增/删除/改动哪个文件 就更改哪个文件及其关联文件,不要全局改动;
+ *
  * - testcase
+ * - move ignore, fragment, template to .docignore in root
+ * - template-->page
+ * - fragment-->component
+ * - fragment in fragment
+ * - bash in src, markdown in doc
+ *  - split helper
  * - tab标签属于非标准功能, 移除,之后用注册的方式加入
- * - move ignore, fragment, template to config.js in root
+ * - 目前fragment会被遍历多次, 如确认每个folder有且仅有一个fragent根目录, 记得修改;
+ * - color console.log
+ *
  */
