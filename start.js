@@ -293,10 +293,9 @@ const onFileRemove = path_from => {
   }
 };
 const onAddDir = path_from => {
-  console.log(_isFiltered(path_from), path_from);
   if (!_isFiltered(path_from)) {
     const path_target = getTargetPath(path_from);
-    fs.mkdirSync(path_target);
+    !fs.existsSync(path_target) && fs.mkdirSync(path_target);
   }
 };
 const startWatch = () => {
