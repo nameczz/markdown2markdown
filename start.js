@@ -27,6 +27,7 @@ const _isFiltered = path_from => {
   return all_filtered.some(name_f => {
     // TODO: really need to handle dir whose name is like fuck.me???
     const str = `/${name_f}$`;
+    console.log(str, "\n");
     const regex = new RegExp(str, "i");
     return regex.test(path_from);
   });
@@ -40,6 +41,7 @@ const _parseFromToTargetPath = path_from => {
   return path.resolve(__dirname, target_rel);
 };
 const _copyDir = path_from => {
+  console.log(path_from, _isFiltered(path_from));
   if (_isFiltered(path_from)) {
     return;
   }
