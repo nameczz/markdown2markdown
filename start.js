@@ -11,12 +11,11 @@ const {
 const {
   writeFile,
   classifyFileAndDir,
-  _getFragment,
   getLanguage,
   replaceFragment,
   replaceContent
 } = require("./src/helpers/File");
-const { getChildrenPath } = require("./src/helpers/Path");
+const { getChildrenPath, getTargetPath } = require("./src/helpers/Path");
 
 //TODO: add parse json to object return default {};
 const _isFiltered = path_abs => {
@@ -271,10 +270,6 @@ const main = path_src => {
 
 let timeout;
 const initialScan = (event, path_abs) => {
-  // console.log(
-  //   "xxx",
-  //   _getFragment("/home/zilliz/project/test-doc/doc/en/test.md")
-  // );
   try {
     if (timeout) {
       clearTimeout(timeout);
@@ -288,18 +283,25 @@ const initialScan = (event, path_abs) => {
   }
 };
 const onFileAdd = path_from => {
-  // console.log(`File ${path_from} has been added`);
   const is_filtered = _isFiltered(path_from);
-  // console.log(is_filtered);
   if (!is_filtered) {
+    console.log(`File ${path_from} has been added`);
     writeFile(path_from);
+  }
+};
+const onFileRemove = path_from => {
+  const path_target = getTargetPath(path_from);
+  if (fs.existsSync(path_target)) {
+    fs.unlinkSync(path_target);
   }
 };
 const startWatch = () => {
   const watcher = chokidar.watch(path.resolve(__dirname, `${name_dir_from}/`));
-  watcher.on("ready", initialScan).on("add", onFileAdd);
-  // .on("change", path => console.log(`File ${path} has been changed`))
-  // .on("unlink", path => console.log(`File ${path} has been removed`))
+  watcher
+    .on("ready", initialScan)
+    .on("add", onFileAdd)
+    .on("change", onFileAdd)
+    .on("unlink", onFileRemove);
   // .on("addDir", path => console.log(`Directory ${path} has been added`))
   // .on("unlinkDir", path => console.log(`Directory ${path} has been removed`))
   // .on("error", error => console.log(`Watcher error: ${error}`))
