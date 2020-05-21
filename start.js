@@ -242,7 +242,6 @@ function convert(target, map_fragment = {}, map_variable = {}) {
     convert(directory, map_fragment, map_variable);
   });
 }
-
 const initialScan = () => {
   const path_from = path.resolve(__dirname, `${name_dir_from}/`);
   console.log(`Documents convention Start`);
@@ -250,7 +249,6 @@ const initialScan = () => {
   const sites_next = res.map(item => _getAbsPath(path_from, item));
   if (sites_next.length) {
     _copyDir(path_from);
-    return;
     sites_next.forEach(path_lang => {
       convert(path_lang);
     });
@@ -324,6 +322,7 @@ startWatch();
  * - bash in src, markdown in doc
  *  - split helper
  * - 目前fragment会被遍历多次, 如确认每个folder有且仅有一个fragent根目录, 记得修改;
+ * 
  * TODO:
  * - variable in .md (top)
  *
