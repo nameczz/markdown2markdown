@@ -12,6 +12,7 @@ const {
   name_file_template
 } = require("./src/Consts");
 const {
+  isDirectory,
   writeFile,
   classifyFileAndDir,
   getLanguage,
@@ -26,8 +27,13 @@ const path_dir_root = process.cwd();
 const _isFiltered = path_from => {
   return all_filtered.some(name_f => {
     // TODO: really need to handle dir whose name is like fuck.me???
-    const str = `/${name_f}$`;
-    console.log(str, "\n");
+    let str;
+    if (isDirectory(path_from)) {
+      str = `/${name_f}$`;
+    } else {
+      const [left, right] = name_f.split(".");
+      str = `/${left}\.${right}`;
+    }
     const regex = new RegExp(str, "i");
     return regex.test(path_from);
   });
