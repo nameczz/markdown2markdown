@@ -25,7 +25,7 @@ const path_dir_root = process.cwd();
 
 const _isFilteredChild = path_abs => {
   return dir_filtered.some(name_d => {
-    const str = `\\/${name_d}\\/`;
+    const str = `/\\/${name_d}\\\//`;
     const regex = new RegExp(str, "i");
     return regex.test(path_abs);
   });
@@ -37,7 +37,7 @@ const _isFiltered = path_abs => {
       const [left, right] = name_f.split(".");
       reg_self = `/${left}\\.${right}$/`;
     } else {
-      reg_self = `/${name_f}$/`;
+      reg_self = `/\\\/${name_f}\$/`;
     }
     const regex = new RegExp(reg_self, "i");
     return regex.test(path_abs);
