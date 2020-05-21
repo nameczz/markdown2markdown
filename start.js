@@ -37,7 +37,7 @@ const _isFiltered = path_abs => {
       const [left, right] = name_f.split(".");
       reg_self = `/${left}\\.${right}$/`;
     } else {
-      reg_self = `/\\\/${name_f}\$/`;
+      reg_self = `\/${name_f}\$`;
     }
     const regex = new RegExp(reg_self, "i");
     return regex.test(path_abs);
