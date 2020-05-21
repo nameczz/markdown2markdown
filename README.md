@@ -1,10 +1,10 @@
 ## What for
 
-Manage product doc files system, especially when multi language file is maintained. Good to use with [Gatsby](https://www.gatsbyjs.org/) or other markdown to html generater. **Especially easy to use for no Non-technical user.**
+Manage product doc files system, especially when multi language file is maintained. Good to use with [Gatsby](https://www.gatsbyjs.org/) or other markdown to html generater. **Especially easy to use for Non-technical User.**
 
 ## Features
 
-- auto add | change | delete target file | directory in **/site** when origin file | directory is add | change | delete in **/src**;
+- Auto update file | directory in **/site** when origin file | directory is add | change | delete in **/src**;
 - varible is supported;
 - fragment is supported;
 - varible in fragment is supported;
@@ -24,7 +24,7 @@ Install with git or [click to download zip](https://github.com/talentAN/markdown
 
 start watcher
 
-`node start.js`
+`yarn start`
 
 ## Examples
 
