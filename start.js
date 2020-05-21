@@ -48,10 +48,9 @@ const _parseFromToTargetPath = path_from => {
 };
 const _copyDir = path_from => {
   if (_isFiltered(path_from)) {
-    console.log("xxx");
-    return;
+    return false;
   }
-  console.log("yyy", "\n");
+  console.log(path_from, "\n");
   const target = _parseFromToTargetPath(path_from);
   const should_copy_this = !fs.existsSync(target);
   if (should_copy_this) {
