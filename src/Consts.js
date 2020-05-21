@@ -16,5 +16,6 @@ module.exports = {
   name_dir_from,
   name_dir_to,
   name_file_variable,
-  name_dir_fragment
+  name_dir_fragment,
+  name_file_template
 };

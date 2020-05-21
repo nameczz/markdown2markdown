@@ -76,7 +76,7 @@ const _getFragment = path_abs => {
   // parse fragment
   return _parseFragment(path_fragment);
 };
-const _readFileToString = path_abs => {
+const fileToString = path_abs => {
   return fs.readFileSync(path_abs).toString() || "";
 };
 const replaceContent = (match, target = "", content) => {
@@ -131,7 +131,7 @@ const writeFile = path_from => {
   const path_to = getTargetPath(path_from);
   const map_variable = _getVariable(path_from);
   const map_fragment = _getFragment(path_from);
-  let content = _readFileToString(path_from);
+  let content = fileToString(path_from);
   const language = getLanguage(path_from);
   content = replaceFragment(content, map_fragment, language);
   content = _replaceVariable(content, map_variable);
@@ -146,5 +146,5 @@ module.exports = {
   getLanguage,
   replaceFragment,
   replaceContent,
-  _getFragment
+  fileToString
 };

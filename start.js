@@ -1,12 +1,16 @@
 const merge = require("lodash/merge");
 const fs = require("fs");
+const process = require("process");
 const path = require("path");
 const chokidar = require("chokidar");
 const {
   dir_filtered,
   all_filtered,
   name_dir_from,
-  name_dir_to
+  name_dir_to,
+  name_dir_fragment,
+  name_file_variable,
+  name_file_template
 } = require("./src/Consts");
 const {
   isDirectory,
@@ -14,9 +18,11 @@ const {
   classifyFileAndDir,
   getLanguage,
   replaceFragment,
-  replaceContent
+  replaceContent,
+  fileToString
 } = require("./src/helpers/File");
 const { getChildrenPath, getTargetPath } = require("./src/helpers/Path");
+const path_dir_root = process.cwd();
 
 //TODO: add parse json to object return default {};
 const _isFiltered = path_from => {
@@ -55,11 +61,9 @@ const _copyDir = path_src => {
   }
 };
 
-const _readFileToString = path_abs => fs.readFileSync(path_abs).toString();
 const _getVersion = () => {
   return `v${
-    JSON.parse(_readFileToString(path.resolve(__dirname, "version.json")))
-      .version
+    JSON.parse(fileToString(path.resolve(__dirname, "version.json"))).version
   }`;
 };
 
@@ -100,13 +104,13 @@ const _replaceTab = (content = "", tabLinks) => {
     .join("")}</div>`;
   return content.replace(tabRegx, html);
 };
-const _reWriteFile = (path_abs, map_fragment, map_variable) => {
-  let content = _readFileToString(path_abs);
-  const language = getLanguage(path_abs);
+const _reWriteFile = (path_from, map_fragment, map_variable) => {
+  let content = fileToString(path_from);
+  const language = getLanguage(path_from);
   content = replaceFragment(content, map_fragment, language);
   content = _replaceVariable(content, map_variable);
-  const path_target = path_abs.replace(name_dir_from, name_dir_to);
-  return fs.writeFileSync(path_target, content);
+  const path_to = getTargetPath(path_from);
+  return fs.writeFileSync(path_to, content);
 };
 const _genPageFromTemplate = (
   path_jsonFile,
@@ -119,12 +123,12 @@ const _genPageFromTemplate = (
   const language = path_jsonFile
     .split(`${__dirname}/${name_dir_from}/`)[1]
     .split("/")[0];
-  let content = _readFileToString(path_template);
+  let content = fileToString(path_template);
   // replace fragment
-  content = _replaceFragment(content, map_fragment, language);
+  content = replaceFragment(content, map_fragment, language);
   // console.log(content);
   // replace var
-  const var_json = JSON.parse(_readFileToString(path_jsonFile));
+  const var_json = JSON.parse(fileToString(path_jsonFile));
   map_variable = merge(map_variable, var_json);
   // console.log(map_variable);
   content = _replaceVariable(content, map_variable);
@@ -231,12 +235,14 @@ function convert(target, map_fragment = {}, map_variable = {}) {
     convert(directory, map_fragment, map_variable);
   });
 }
-const main = path_src => {
+
+const initialScan = () => {
+  const path_from = path.resolve(__dirname, `${name_dir_from}/`);
   console.log(`Documents convention Start`);
-  const res = fs.readdirSync(path_src) || [];
-  const sites_next = res.map(item => _getAbsPath(path_src, item));
+  const res = fs.readdirSync(path_from) || [];
+  const sites_next = res.map(item => _getAbsPath(path_from, item));
   if (sites_next.length) {
-    _copyDir(path_src);
+    _copyDir(path_from);
     sites_next.forEach(path_lang => {
       convert(path_lang);
     });
@@ -244,21 +250,6 @@ const main = path_src => {
     // });
   } else {
     console.warn(`Documents is Empty`);
-  }
-};
-
-let timeout;
-const initialScan = (event, path_abs) => {
-  try {
-    if (timeout) {
-      clearTimeout(timeout);
-    }
-    timeout = setTimeout(() => {
-      // main(path.resolve(__dirname, `${name_dir_from}/`));
-    }, 1000);
-  } catch (err) {
-    console.log(err);
-    return;
   }
 };
 const onFileAdd = path_from => {
@@ -300,7 +291,9 @@ const onDirRemove = path_from => {
   _rmDir(path_target);
 };
 const startWatch = () => {
-  const watcher = chokidar.watch(path.resolve(__dirname, `${name_dir_from}/`));
+  const watcher = chokidar.watch(
+    path.resolve(path_dir_root, `${name_dir_from}/`)
+  );
   watcher
     .on("ready", initialScan)
     .on("add", onFileAdd)
@@ -308,15 +301,7 @@ const startWatch = () => {
     .on("unlink", onFileRemove)
     .on("addDir", onAddDir)
     .on("unlinkDir", onDirRemove);
-  // .on("error", error => console.log(`Watcher error: ${error}`))
-  // .on("all", (event, path) => console.log(event, path))
-  // .on("raw", (event, path, details) => {
-  //   log("Raw event info:", event, path, details);
-  // });
-  // watcher.on("all", initialScan);
-  // .on("error", error => log(`Watcher error: ${error}`));
 };
-
 startWatch();
 
 /**
@@ -327,9 +312,9 @@ startWatch();
  * - 源文件监控, 目标文件自动生成
  * - 不相关的文件不要移动和复制
  * - Readme
+ * - 新增/删除/改动哪个文件 就更改哪个文件及其关联文件,不要全局改动;
  * TODO:
  * - variable in .md (top)
- * - 新增/删除/改动哪个文件 就更改哪个文件及其关联文件,不要全局改动;
  *
  * - testcase
  * - move ignore, fragment, template to .docignore in root
