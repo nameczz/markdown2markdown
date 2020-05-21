@@ -9,6 +9,7 @@ const {
   name_dir_to
 } = require("./src/Consts");
 const {
+  isDirectory,
   writeFile,
   classifyFileAndDir,
   getLanguage,
@@ -18,11 +19,11 @@ const {
 const { getChildrenPath, getTargetPath } = require("./src/helpers/Path");
 
 //TODO: add parse json to object return default {};
-const _isFiltered = path_abs => {
+const _isFiltered = path_from => {
   return all_filtered.some(name_f => {
     // 用正则处理文件夹带"."的情况比较麻烦
-    const str = `/${name_f}`;
-    return path_abs.indexOf(str) !== -1;
+    const str = isDirectory(path_from) ? `/${name_f}/` : `/${name_f}`;
+    return path_from.indexOf(str) !== -1;
   });
 };
 const _isDirFiltered = path_abs => {
@@ -35,11 +36,6 @@ const _parseFromToTargetPath = path_from => {
   let target_rel = arr[1].replace(name_dir_from, name_dir_to);
   target_rel = target_rel.slice(1, target_rel.length);
   return path.resolve(__dirname, target_rel);
-};
-const _addDir = path_abs => {
-  if (!fs.existsSync(path_abs)) {
-    fs.mkdirSync(path_abs);
-  }
 };
 const _copyDir = path_src => {
   if (_isDirFiltered(path_src)) {
@@ -270,6 +266,7 @@ const main = path_src => {
 
 let timeout;
 const initialScan = (event, path_abs) => {
+  return;
   try {
     if (timeout) {
       clearTimeout(timeout);
@@ -285,7 +282,7 @@ const initialScan = (event, path_abs) => {
 const onFileAdd = path_from => {
   const is_filtered = _isFiltered(path_from);
   if (!is_filtered) {
-    console.log(`File ${path_from} has been added`);
+    // console.log(`File ${path_from} has been added`);
     writeFile(path_from);
   }
 };
@@ -295,14 +292,21 @@ const onFileRemove = path_from => {
     fs.unlinkSync(path_target);
   }
 };
+const onAddDir = path_from => {
+  console.log(_isFiltered(path_from), path_from);
+  if (!_isFiltered(path_from)) {
+    const path_target = getTargetPath(path_from);
+    fs.mkdirSync(path_target);
+  }
+};
 const startWatch = () => {
   const watcher = chokidar.watch(path.resolve(__dirname, `${name_dir_from}/`));
   watcher
     .on("ready", initialScan)
     .on("add", onFileAdd)
     .on("change", onFileAdd)
-    .on("unlink", onFileRemove);
-  // .on("addDir", path => console.log(`Directory ${path} has been added`))
+    .on("unlink", onFileRemove)
+    .on("addDir", onAddDir);
   // .on("unlinkDir", path => console.log(`Directory ${path} has been removed`))
   // .on("error", error => console.log(`Watcher error: ${error}`))
   // .on("all", (event, path) => console.log(event, path))

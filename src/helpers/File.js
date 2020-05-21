@@ -13,7 +13,7 @@ const path_dir_root = process.cwd();
 const getLanguage = path_abs => {
   return path_abs.split(`${path_dir_root}/${name_dir_from}/`)[1].split("/")[0];
 };
-const _isDirectory = path_abs => fs.lstatSync(path_abs).isDirectory();
+const isDirectory = path_abs => fs.lstatSync(path_abs).isDirectory();
 const parseJsonFile = path_abs => {
   return JSON.parse(fs.readFileSync(path_abs).toString() || "{}");
 };
@@ -42,7 +42,7 @@ const classifyFileAndDir = paths_cdd => {
   paths_cdd.forEach(path_cdd => {
     const isMarkdownFile = path_cdd.indexOf(".md") === path_cdd.length - 3;
     const isJsonFile = path_cdd.indexOf(".json") === path_cdd.length - 5;
-    if (_isDirectory(path_cdd)) {
+    if (isDirectory(path_cdd)) {
       directories.push(path_cdd);
     } else if (isMarkdownFile) {
       markdowns.push(path_cdd);
@@ -139,6 +139,7 @@ const writeFile = path_from => {
 };
 
 module.exports = {
+  isDirectory,
   parseJsonFile,
   writeFile,
   classifyFileAndDir,
