@@ -1,17 +1,14 @@
+const {
+  dir_filtered,
+  all_filtered,
+  name_dir_from,
+  name_dir_to
+} = require("./src/Consts");
+const { getVariable } = require("./src/helpers/File");
 const merge = require("lodash/merge");
 const fs = require("fs");
 const path = require("path");
 const chokidar = require("chokidar");
-
-const name_dir_from = "doc";
-const name_dir_to = "site";
-const name_dir_fragment = "fragment";
-const name_file_variable = "variables.json";
-const name_file_template = "template.md";
-
-const file_filtered = [name_file_variable, name_file_template];
-const dir_filtered = [name_dir_fragment];
-const all_filtered = [...file_filtered, dir_filtered];
 
 //TODO: add parse json to object return default {};
 const _isFiltered = path_abs => {
@@ -328,9 +325,9 @@ const initialScan = (event, path_abs) => {
   }
 };
 const onFileAdd = path_abs => {
-  console.log(`File ${path_abs} has been added`);
+  // console.log(`File ${path_abs} has been added`);
   const is_filtered = _isFiltered(path_abs);
-  console.log(is_filtered);
+  // console.log(is_filtered);
   if (!is_filtered) {
     const parh_target = _parseFromToTargetPath(path_abs);
   }
