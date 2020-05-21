@@ -249,7 +249,6 @@ const main = path_src => {
 
 let timeout;
 const initialScan = (event, path_abs) => {
-  return;
   try {
     if (timeout) {
       clearTimeout(timeout);
@@ -289,7 +288,7 @@ const onDirRemove = path_from => {
       for (var i = 0; i < files.length; i++) {
         let newPath = path.join(path_target, files[i]);
         let stat = fs.statSync(newPath);
-        if (!stat.isDirectory()) {
+        if (stat && !stat.isDirectory()) {
           fs.unlinkSync(newPath);
         }
       }
