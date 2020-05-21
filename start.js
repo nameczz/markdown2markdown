@@ -4,8 +4,8 @@ const process = require("process");
 const path = require("path");
 const chokidar = require("chokidar");
 const {
-  file_filtered,
   dir_filtered,
+  all_filtered,
   name_dir_from,
   name_dir_to,
   name_dir_fragment,
@@ -13,7 +13,6 @@ const {
   name_file_template
 } = require("./src/Consts");
 const {
-  isDirectory,
   writeFile,
   classifyFileAndDir,
   getLanguage,
@@ -262,8 +261,8 @@ const initialScan = () => {
   }
 };
 const onFileAdd = path_from => {
-  const is_filtered = _isFiltered(path_from);
-  if (!is_filtered) {
+  if (!_isFiltered(path_from)) {
+    console.log(path_from, "\n");
     writeFile(path_from);
   }
 };
@@ -275,6 +274,7 @@ const onFileRemove = path_from => {
 };
 const onAddDir = path_from => {
   if (!_isFiltered(path_from)) {
+    console.log(path_from, "\n");
     const path_target = getTargetPath(path_from);
     !fs.existsSync(path_target) && fs.mkdirSync(path_target);
   }
