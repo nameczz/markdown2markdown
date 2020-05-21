@@ -4,7 +4,8 @@ const process = require("process");
 const path = require("path");
 const chokidar = require("chokidar");
 const {
-  all_filtered,
+  file_filtered,
+  dir_filtered,
   name_dir_from,
   name_dir_to,
   name_dir_fragment,
@@ -23,13 +24,33 @@ const {
 const { getChildrenPath, getTargetPath } = require("./src/helpers/Path");
 const path_dir_root = process.cwd();
 
-//TODO: add parse json to object return default {};
+const _isFilteredChild = path_abs => {
+  return dir_filtered.some(name_d => {
+    const str = `/\/${name_d}\//`;
+    const regex = new RegExp(str, "i");
+    return regex.test(path_abs);
+  });
+};
+const _isFiltered = path_abs => {
+  const self_filtered = all_filtered.some(name_f => {
+    let reg_self;
+    if (name_f.indexOf(".") !== -1) {
+      const [left, right] = name_f.split(".");
+      reg_self = `/${left}\.${right}$/`;
+    } else {
+      reg_self = `/${name_f}$/`;
+    }
+    const regex = new RegExp(reg_self, "i");
+    return regex.test(path_abs);
+  });
+  return self_filtered || _isFilteredChild(path_abs);
+};
 const _isFiltered = path_from => {
   return all_filtered.some(name_f => {
-    // TODO: really need to handle dir whose name is like fuck.me???
-    let str;
+    let str, father;
     if (isDirectory(path_from)) {
       str = `/${name_f}$`;
+      father = `/\/${name_f}\//`;
     } else {
       const [left, right] = name_f.split(".");
       str = `/${left}\.${right}`;
