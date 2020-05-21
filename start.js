@@ -27,9 +27,10 @@ const path_dir_root = process.cwd();
 //TODO: add parse json to object return default {};
 const _isFiltered = path_from => {
   return all_filtered.some(name_f => {
-    // 用正则处理文件夹带"."的情况比较麻烦
-    const str = isDirectory(path_from) ? `/${name_f}/` : `/${name_f}`;
-    return path_from.indexOf(str) !== -1;
+    // TODO: really need to handle dir whose name is like fuck.me???
+    const str = `/${name_f}$`;
+    const regex = new RegExp(str, "i");
+    return regex.test(path_from);
   });
 };
 const _getAbsPath = (father, child) => `${father}/${child}`;
