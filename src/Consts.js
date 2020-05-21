@@ -4,7 +4,7 @@ const name_file_template = "template.md";
 
 const file_filtered = [name_file_variable, name_file_template];
 const dir_filtered = [name_dir_fragment];
-const all_filtered = [...file_filtered, dir_filtered];
+const all_filtered = [...file_filtered, ...dir_filtered];
 
 const name_dir_from = "doc";
 const name_dir_to = "site";

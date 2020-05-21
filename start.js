@@ -4,7 +4,6 @@ const process = require("process");
 const path = require("path");
 const chokidar = require("chokidar");
 const {
-  dir_filtered,
   all_filtered,
   name_dir_from,
   name_dir_to,
@@ -13,7 +12,6 @@ const {
   name_file_template
 } = require("./src/Consts");
 const {
-  isDirectory,
   writeFile,
   classifyFileAndDir,
   getLanguage,
