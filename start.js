@@ -32,9 +32,6 @@ const _isFiltered = path_from => {
     return path_from.indexOf(str) !== -1;
   });
 };
-const _isDirFiltered = path_abs => {
-  return dir_filtered.some(f => path_abs.indexOf(f) > -1);
-};
 const _getAbsPath = (father, child) => `${father}/${child}`;
 
 const _parseFromToTargetPath = path_from => {
@@ -43,16 +40,16 @@ const _parseFromToTargetPath = path_from => {
   target_rel = target_rel.slice(1, target_rel.length);
   return path.resolve(__dirname, target_rel);
 };
-const _copyDir = path_src => {
-  if (_isDirFiltered(path_src)) {
+const _copyDir = path_from => {
+  if (_isFiltered(path_from)) {
     return;
   }
-  const target = _parseFromToTargetPath(path_src);
+  const target = _parseFromToTargetPath(path_from);
   const should_copy_this = !fs.existsSync(target);
   if (should_copy_this) {
     fs.mkdirSync(target);
   }
-  const children = getChildrenPath(path_src) || [];
+  const children = getChildrenPath(path_from) || [];
   const { directories } = classifyFileAndDir(children);
   if (directories.length) {
     directories.forEach(d => {
