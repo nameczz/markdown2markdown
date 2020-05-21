@@ -45,20 +45,7 @@ const _isFiltered = path_abs => {
   });
   return self_filtered || _isFilteredChild(path_abs);
 };
-const _isFiltered = path_from => {
-  return all_filtered.some(name_f => {
-    let str, father;
-    if (isDirectory(path_from)) {
-      str = `/${name_f}$`;
-      father = `/\/${name_f}\//`;
-    } else {
-      const [left, right] = name_f.split(".");
-      str = `/${left}\.${right}`;
-    }
-    const regex = new RegExp(str, "i");
-    return regex.test(path_from);
-  });
-};
+
 const _getAbsPath = (father, child) => `${father}/${child}`;
 
 const _parseFromToTargetPath = path_from => {
