@@ -50,7 +50,6 @@ const _copyDir = path_from => {
   if (_isFiltered(path_from)) {
     return false;
   }
-  console.log(path_from, "\n");
   const target = _parseFromToTargetPath(path_from);
   const should_copy_this = !fs.existsSync(target);
   if (should_copy_this) {
@@ -244,6 +243,7 @@ const initialScan = () => {
   const sites_next = res.map(item => _getAbsPath(path_from, item));
   if (sites_next.length) {
     _copyDir(path_from);
+    debugger;
     sites_next.forEach(path_lang => {
       convert(path_lang);
     });
