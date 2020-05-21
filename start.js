@@ -296,10 +296,8 @@ const _rmDir = path_target => {
 };
 const onDirRemove = path_from => {
   console.log("xxx", path_from);
-  if (!_isFiltered(path_from)) {
-    const path_target = getTargetPath(path_from);
-    _rmDir(path_target);
-  }
+  const path_target = getTargetPath(path_from);
+  _rmDir(path_target);
 };
 const startWatch = () => {
   const watcher = chokidar.watch(path.resolve(__dirname, `${name_dir_from}/`));
