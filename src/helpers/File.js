@@ -7,9 +7,9 @@ const {
   name_dir_fragment
 } = require("../Consts");
 const { getTargetPath, getChildrenPath } = require("./Path");
-
 const path_dir_root = process.cwd();
 
+const _isDirectory = path_abs => fs.lstatSync(path_abs).isDirectory();
 const parseJsonFile = path_abs => {
   return JSON.parse(fs.readFileSync(path_abs).toString() || "{}");
 };
@@ -48,13 +48,7 @@ const classifyFileAndDir = paths_cdd => {
   });
   return { directories, markdowns, jsons };
 };
-const _getFragment = path_abs => {
-  // get path
-  const path_doc = `${path_dir_root}/${name_dir_from}/`;
-  const lang = path_abs.split(path_doc)[1].split("/")[0];
-  const path_fragment = `${path_dir_root}/${name_dir_from}/${lang}/${name_dir_fragment}`;
-  // parse fragment
-  let map_fragment = {};
+const _parseFragment = (path_fragment, map_fragment = {}) => {
   const paths_child = getChildrenPath(path_fragment);
   const { directories, markdowns } = classifyFileAndDir(paths_child);
   if (markdowns.length) {
@@ -65,13 +59,37 @@ const _getFragment = path_abs => {
   }
   if (directories.length) {
     directories.forEach(d => {
-      map_fragment = _getFragment(d, map_fragment);
+      map_fragment = _parseFragment(d, map_fragment);
     });
   }
   return map_fragment;
 };
+const _getFragment = path_abs => {
+  // get path
+  const path_doc = `${path_dir_root}/${name_dir_from}/`;
+  const lang = path_abs.split(path_doc)[1].split("/")[0];
+  const path_fragment = `${path_dir_root}/${name_dir_from}/${lang}/${name_dir_fragment}`;
+  // parse fragment
+  return _parseFragment(path_fragment);
+};
 const _readFileToString = path_abs => {
   return fs.readFileSync(path_abs).toString() || "";
+};
+const _replaceFragment = (content, map_fragment, language) => {
+  const regex = /\{\{fragment\/.{0,1000}\}\}/gi;
+  const matches = content.match(regex);
+  if (matches) {
+    matches.forEach(name_dir_fragment => {
+      const key = name_dir_fragment
+        .split(" ")
+        .join("")
+        .slice(2, name_dir_fragment.length - 2);
+      const path_abs = path.resolve(__dirname, name_dir_from, language, key);
+      const content_f = map_fragment[path_abs];
+      content = _replaceContent(name_dir_fragment, content_f, content);
+    });
+  }
+  return content;
 };
 const writeFile = path_from => {
   const path_to = getTargetPath(path_from);
@@ -86,5 +104,7 @@ const writeFile = path_from => {
 module.exports = {
   parseJsonFile,
   writeFile,
-  classifyFileAndDir
+  classifyFileAndDir,
+
+  _getFragment
 };

@@ -8,7 +8,11 @@ const {
   name_dir_from,
   name_dir_to
 } = require("./src/Consts");
-const { writeFile, classifyFileAndDir } = require("./src/helpers/File");
+const {
+  writeFile,
+  classifyFileAndDir,
+  _getFragment
+} = require("./src/helpers/File");
 const { getChildrenPath } = require("./src/helpers/Path");
 
 //TODO: add parse json to object return default {};
@@ -23,7 +27,6 @@ const _isDirFiltered = path_abs => {
   return dir_filtered.some(f => path_abs.indexOf(f) > -1);
 };
 const _getAbsPath = (father, child) => `${father}/${child}`;
-const _isDirectory = path_abs => fs.lstatSync(path_abs).isDirectory();
 
 const _parseFromToTargetPath = path_from => {
   const arr = path_from.split(__dirname);
@@ -93,9 +96,7 @@ const _getTargetPathFromJson = path_abs => {
 const _replaceFragment = (content, map_fragment, language) => {
   const regex = /\{\{fragment\/.{0,1000}\}\}/gi;
   const matches = content.match(regex);
-  // console.log(matches);
   if (matches) {
-    // console.log(matches);
     matches.forEach(name_dir_fragment => {
       const key = name_dir_fragment
         .split(" ")
@@ -103,9 +104,7 @@ const _replaceFragment = (content, map_fragment, language) => {
         .slice(2, name_dir_fragment.length - 2);
       const path_abs = path.resolve(__dirname, name_dir_from, language, key);
       const content_f = map_fragment[path_abs];
-      // console.log(content);
       content = _replaceContent(name_dir_fragment, content_f, content);
-      // console.log(content);
     });
   }
   return content;
@@ -294,7 +293,10 @@ const main = path_src => {
 
 let timeout;
 const initialScan = (event, path_abs) => {
-  // _getFragment("/home/zilliz/project/test-doc/doc/en/test.md");
+  console.log(
+    "xxx",
+    _getFragment("/home/zilliz/project/test-doc/doc/en/test.md")
+  );
   try {
     if (timeout) {
       clearTimeout(timeout);
