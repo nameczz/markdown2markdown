@@ -54,23 +54,6 @@ const _copyDir = path_src => {
     });
   }
 };
-const _removeDir = dir => {
-  let files = fs.readdirSync(dir);
-  for (var i = 0; i < files.length; i++) {
-    let newPath = path.join(dir, files[i]);
-    let stat = fs.statSync(newPath);
-    if (stat.isDirectory()) {
-      //如果是文件夹就递归下去
-      _removeDir(newPath);
-    } else {
-      //删除文件
-      fs.unlinkSync(newPath);
-    }
-  }
-  if (dir !== path.resolve(__dirname, name_dir_to)) {
-    fs.rmdirSync(dir);
-  }
-};
 
 const _readFileToString = path_abs => fs.readFileSync(path_abs).toString();
 const _getVersion = () => {
@@ -282,7 +265,6 @@ const initialScan = (event, path_abs) => {
 const onFileAdd = path_from => {
   const is_filtered = _isFiltered(path_from);
   if (!is_filtered) {
-    // console.log(`File ${path_from} has been added`);
     writeFile(path_from);
   }
 };
@@ -298,6 +280,23 @@ const onAddDir = path_from => {
     !fs.existsSync(path_target) && fs.mkdirSync(path_target);
   }
 };
+const onDirRemove = path_from => {
+  console.log("xxx", path_from);
+  if (!_isFiltered(path_from)) {
+    const path_target = getTargetPath(path_from);
+    if (fs.existsSync(path_target)) {
+      let files = fs.readdirSync(path_target);
+      for (var i = 0; i < files.length; i++) {
+        let newPath = path.join(path_target, files[i]);
+        let stat = fs.statSync(newPath);
+        if (!stat.isDirectory()) {
+          fs.unlinkSync(newPath);
+        }
+      }
+      fs.rmdirSync(path_target);
+    }
+  }
+};
 const startWatch = () => {
   const watcher = chokidar.watch(path.resolve(__dirname, `${name_dir_from}/`));
   watcher
@@ -305,8 +304,8 @@ const startWatch = () => {
     .on("add", onFileAdd)
     .on("change", onFileAdd)
     .on("unlink", onFileRemove)
-    .on("addDir", onAddDir);
-  // .on("unlinkDir", path => console.log(`Directory ${path} has been removed`))
+    .on("addDir", onAddDir)
+    .on("unlinkDir", onDirRemove);
   // .on("error", error => console.log(`Watcher error: ${error}`))
   // .on("all", (event, path) => console.log(event, path))
   // .on("raw", (event, path, details) => {
