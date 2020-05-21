@@ -262,7 +262,6 @@ const initialScan = () => {
 };
 const onFileAdd = path_from => {
   if (!_isFiltered(path_from)) {
-    console.log(path_from, "\n");
     writeFile(path_from);
   }
 };
@@ -274,7 +273,6 @@ const onFileRemove = path_from => {
 };
 const onAddDir = path_from => {
   if (!_isFiltered(path_from)) {
-    console.log(path_from, "\n");
     const path_target = getTargetPath(path_from);
     !fs.existsSync(path_target) && fs.mkdirSync(path_target);
   }
