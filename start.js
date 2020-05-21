@@ -243,7 +243,7 @@ const initialScan = () => {
   const sites_next = res.map(item => _getAbsPath(path_from, item));
   if (sites_next.length) {
     _copyDir(path_from);
-    debugger;
+    return;
     sites_next.forEach(path_lang => {
       convert(path_lang);
     });
