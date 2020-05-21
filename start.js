@@ -11,7 +11,10 @@ const {
 const {
   writeFile,
   classifyFileAndDir,
-  _getFragment
+  _getFragment,
+  getLanguage,
+  replaceFragment,
+  replaceContent
 } = require("./src/helpers/File");
 const { getChildrenPath } = require("./src/helpers/Path");
 
@@ -82,32 +85,9 @@ const _getVersion = () => {
   }`;
 };
 
-const _replaceContent = (match, target = "", content) => {
-  const len = match.length;
-  const i = content.indexOf(match);
-  const c_before = content.slice(0, i);
-  const c_after = content.slice(i + len, content.length);
-  return c_before + target + c_after;
-};
 const _getTargetPathFromJson = path_abs => {
   path_abs = path_abs.replace(name_dir_from, name_dir_to);
   return path_abs.slice(0, path_abs.length - 4) + "md";
-};
-const _replaceFragment = (content, map_fragment, language) => {
-  const regex = /\{\{fragment\/.{0,1000}\}\}/gi;
-  const matches = content.match(regex);
-  if (matches) {
-    matches.forEach(name_dir_fragment => {
-      const key = name_dir_fragment
-        .split(" ")
-        .join("")
-        .slice(2, name_dir_fragment.length - 2);
-      const path_abs = path.resolve(__dirname, name_dir_from, language, key);
-      const content_f = map_fragment[path_abs];
-      content = _replaceContent(name_dir_fragment, content_f, content);
-    });
-  }
-  return content;
 };
 const _replaceVariable = (content = "", variable) => {
   const regex = /\{\{var\..{0,1000}\}\}/gi;
@@ -127,7 +107,7 @@ const _replaceVariable = (content = "", variable) => {
         target = target[key];
         i++;
       }
-      content = _replaceContent(name_dir_fragment, target, content);
+      content = replaceContent(name_dir_fragment, target, content);
       // console.log(content);
     });
   }
@@ -144,10 +124,8 @@ const _replaceTab = (content = "", tabLinks) => {
 };
 const _reWriteFile = (path_abs, map_fragment, map_variable) => {
   let content = _readFileToString(path_abs);
-  const language = path_abs
-    .split(`${__dirname}/${name_dir_from}/`)[1]
-    .split("/")[0];
-  content = _replaceFragment(content, map_fragment, language);
+  const language = getLanguage(path_abs);
+  content = replaceFragment(content, map_fragment, language);
   content = _replaceVariable(content, map_variable);
   const path_target = path_abs.replace(name_dir_from, name_dir_to);
   return fs.writeFileSync(path_target, content);
@@ -293,10 +271,10 @@ const main = path_src => {
 
 let timeout;
 const initialScan = (event, path_abs) => {
-  console.log(
-    "xxx",
-    _getFragment("/home/zilliz/project/test-doc/doc/en/test.md")
-  );
+  // console.log(
+  //   "xxx",
+  //   _getFragment("/home/zilliz/project/test-doc/doc/en/test.md")
+  // );
   try {
     if (timeout) {
       clearTimeout(timeout);
@@ -314,7 +292,7 @@ const onFileAdd = path_from => {
   const is_filtered = _isFiltered(path_from);
   // console.log(is_filtered);
   if (!is_filtered) {
-    // writeFile(parh_from);
+    writeFile(path_from);
   }
 };
 const startWatch = () => {
